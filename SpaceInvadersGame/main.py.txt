@@ -1,0 +1,58 @@
+import pygame
+from pygame.sprite import Group
+
+from settings import Settings
+from game_stats import GameStats
+from scoreboard import Scoreboard
+from button import Button
+from ship import Ship
+from alien import Alien
+from bullet import Bullet
+
+import game_functions as gf
+
+def run_game():
+    # create screen and game
+    pygame.init()
+    settings = Settings()
+    screen = pygame.display.set_mode((settings.screen_width, settings.screen_height))
+    pygame.display.set_caption("test")
+    
+    stats = GameStats(settings)
+    
+    # make the ship
+    ship = Ship(settings, screen)
+    
+    # make the aliens
+    aliens = Group()
+    
+    # add fleet of aliens
+    gf.create_fleet(settings, screen, ship, aliens)
+    
+    # make the group of bullets
+    bullets = Group()
+    
+    # make the start button
+    play_button = Button(settings, screen, "Start")
+    
+    #make the score board
+    scoreboard = Scoreboard(settings, screen, stats)
+    
+    # start main loop
+    while True:
+        
+        #all events
+        gf.check_events(settings, screen, stats, scoreboard, ship, bullets, aliens, play_button)
+        
+        if stats.game_active:
+            #only do if still running
+            ship.move()
+            gf.update_bullets(bullets)
+            gf.update_aliens(settings, aliens)
+            gf.check_collisions(settings, stats, scoreboard, bullets, aliens)
+            gf.is_ship_attacked(settings, screen, stats, scoreboard, ship, aliens, bullets)
+            gf.reset_cleared_game(settings, screen, stats, scoreboard, ship, aliens, bullets)
+        
+        gf.update_screen(settings, screen, stats, scoreboard, ship, aliens, bullets, play_button)
+        
+run_game()
